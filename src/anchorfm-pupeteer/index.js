@@ -54,7 +54,7 @@ async function postEpisode(youtubeVideoInfo) {
     logger.info('Launching puppeteer');
     browser = await puppeteer.launch({ args: ['--no-sandbox'], headless: env.PUPETEER_HEADLESS });
 
-    page = await openNewPage('https://podcasters.spotify.com/pod/dashboard/episode/wizard');
+    page = await openNewPage('https://creators.spotify.com/pod/dashboard/episode/wizard');
 
     logger.info('Setting language to English');
     await setLanguageToEnglish();
