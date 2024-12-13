@@ -249,10 +249,11 @@ async function postEpisode(youtubeVideoInfo) {
     }
 
     logger.info('-- Selection promotional content(formerly content sponsorship - sponsored or not sponsored)');
-    const selectorForSponsoredContent = env.IS_SPONSORED
-      ? 'input[type="radio"][name="sponsored-content"]'
-      : 'input[type="radio"][id="no-sponsored-content"]';
-    await clickSelector(page, selectorForSponsoredContent, { visible: true });
+    if (env.IS_SPONSORED) {
+      const promotionalContentCheckboxLabelSelector =
+        '::-p-xpath(//input[@name="podcastEpisodeContainsSponsoredContent"]/parent::*)';
+      await clickSelector(page, promotionalContentCheckboxLabelSelector);
+    }
   }
 
   async function fillReviewAndPublishDetails() {
