@@ -219,10 +219,13 @@ async function postEpisode(youtubeVideoInfo) {
     const textboxInputSelector = 'div[role="textbox"]';
     await page.waitForSelector(textboxInputSelector, { visible: true });
     const finalDescription = addUrlToDescription(youtubeVideoInfo);
+    // focus and selectAll on the description textbox is important in order for the paste to work
+    await page.focus(textboxInputSelector);
+    await selectAll(page, textboxInputSelector);
     if (isEmpty(finalDescription)) {
-      await page.type(textboxInputSelector, `Video: ${youtubeVideoInfo.url}`);
+      await execClipboardPasteEvent(page, textboxInputSelector, `Video: ${youtubeVideoInfo.url}`);
     } else {
-      await page.type('div[role="textbox"]', finalDescription);
+      await execClipboardPasteEvent(page, textboxInputSelector, finalDescription);
     }
 
     if (env.LOAD_THUMBNAIL) {
@@ -313,6 +316,35 @@ async function getTextContentFromSelector(page, selector, options = {}) {
 
 async function getTextContentFromDom(page, domElementHandle) {
   return page.evaluate((element) => element.textContent, domElementHandle);
+}
+
+function execClipboardPasteEvent(page, selector, textToPaste) {
+  return page.evaluate(
+    (sel, text) => {
+      const target = document.querySelector(sel);
+      const dataTransfer = new DataTransfer();
+      dataTransfer.setData('text/plain', text);
+      const clipboardEvent = new ClipboardEvent('paste', {
+        clipboardData: dataTransfer,
+        bubbles: true,
+        cancelable: true,
+      });
+      target.dispatchEvent(clipboardEvent);
+    },
+    selector,
+    textToPaste
+  );
+}
+
+function selectAll(page, selector) {
+  return page.evaluate((sel) => {
+    const element = document.querySelector(sel);
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }, selector);
 }
 
 module.exports = {
