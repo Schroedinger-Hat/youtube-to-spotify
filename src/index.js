@@ -39,7 +39,10 @@ async function main() {
   logger.info(`description: ${description}`);
   logger.info(`Upload date: ${JSON.stringify(uploadDate)}`);
 
-  await Promise.all([downloadThumbnail(youtubeVideoId), downloadAudio(youtubeVideoId)]);
+  if (env.LOAD_THUMBNAIL) {
+    await downloadThumbnail(youtubeVideoId);
+  }
+  await downloadAudio(youtubeVideoId);
 
   logger.info('Posting episode to spotify');
   await postEpisode(youtubeVideoInfo);
