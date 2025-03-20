@@ -173,9 +173,12 @@ env:
 
 It is possible to use a single repository to maintain several shows.
 
-You'll need an episode config per show.
+There are two ways to do that.
 
-As an example, suppose you have two shows, you called "Great News" and another "Sad News".
+### You have multiple accounts.
+
+As an example, suppose you have two shows, you called "Great News" and another "Sad News". Every
+show on its own account.
 
 You repository will look like this:
 
@@ -215,6 +218,35 @@ jobs:
           SPOTIFY_PASSWORD: ${{ secrets.SPOTIFY_PASSWORD_GREATNEWS }}  # OR secrets.SPOTIFY_PASSWORD_SADNEWS
           EPISODE_PATH: /github/workspace/
           EPISODE_FILE: great-news.json
+          # (…) Other configs as needed
+```
+
+### You have multiple podcasts on the same account
+
+Same as before, you setup one config per podcast, but with the same `SPOTIFY_EMAIL` and `SPOTIFY_PASSWORD`.
+But now you provide a title for the podcast, to that it can be found in the list:
+
+In `great-news.yaml` and `sad-news.yaml`:
+```yaml
+name: 'Great News Upload Action'
+on:
+  push:
+    paths:
+    ## only updates to this file trigger this action
+      - great-news.json   # or sad-news.json
+jobs:
+  upload_episode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Upload Episode from YouTube To Spotify
+        uses: Schrodinger-Hat/youtube-to-spotify@v2.5.0
+        env:
+          SPOTIFY_EMAIL: ${{ secrets.SPOTIFY_EMAIL }}   # Both shows on the same account
+          SPOTIFY_PASSWORD: ${{ secrets.SPOTIFY_PASSWORD }}
+          PODCAST_TITLE: Great News  # Or "Sad News", just as shown in your spotify podcasts list
+          EPISODE_PATH: /github/workspace/
+          EPISODE_FILE: great-news.json  # or sad-news.json
           # (…) Other configs as needed
 ```
 

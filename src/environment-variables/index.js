@@ -20,6 +20,7 @@ const defaultValues = {
   THUMBNAIL_FILE_FORMAT: 'jpg',
   THUMBNAIL_FILE_TEMPLATE: 'thumbnail.%(ext)s',
   PUPPETEER_HEADLESS: true,
+  PODCAST_TITLE: ''
 };
 
 const dotEnvVariables = parseDotEnvVariables();
@@ -70,6 +71,7 @@ module.exports = {
   SPOTIFY_PASSWORD: getEnvironmentVariable('SPOTIFY_PASSWORD'),
   SPOTIFY_EMAIL: getEnvironmentVariable('SPOTIFY_EMAIL'),
   SPOTIFY_PASSWORD: getEnvironmentVariable('SPOTIFY_PASSWORD'),
+  PODCAST_TITLE: getEnvironmentVariable('PODCAST_TITLE'),
   UPLOAD_TIMEOUT: getEnvironmentVariable('UPLOAD_TIMEOUT'),
   SAVE_AS_DRAFT: getBoolean(getEnvironmentVariable('SAVE_AS_DRAFT')),
   LOAD_THUMBNAIL: getBoolean(getEnvironmentVariable('LOAD_THUMBNAIL')),

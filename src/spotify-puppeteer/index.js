@@ -49,6 +49,43 @@ async function setPublishDate(page, date) {
   }
 }
 
+async function selectPodcast(page, targetTitle) {
+  // When we come to this point in the flow, the dashboard page
+  // is in a state it never reaches when using interatively: it has 
+  // no podcast selected and all the podcasts are in the list, available to be selected.
+  //
+  // Normally, when whe access the creators dashboard, there is a podcast already selected
+  // and others available podcasts to be selected.
+  //
+  // This helped us here, because we can simply choose and click on any podcast on the list.
+  // But note that if the user has not provided a podcast title, it means she wants
+  // the first one, so we cannot enter this state and just follow from the state the
+  // page is before entering here.
+  if (env.PODCAST_TITLE === '') {
+    logger.info('-- No PODCAST_TITLE provided. Using default podcast.');
+    return
+  }
+  
+  var navigationPromise = page.waitForNavigation();
+  await page.goto('https://podcasters.spotify.com/pod/dashboard/episodes')
+  await navigationPromise;
+
+  logger.info(`-- Searching for podcast ${targetTitle}`);
+  const elementHandle = await page.waitForFunction(`
+      document.querySelector('#__chrome').shadowRoot.querySelector("a[aria-label='${targetTitle}']")
+    `);
+
+  logger.info(`-- Selected podcast ${targetTitle}`);
+  navigationPromise = page.waitForNavigation();
+  await elementHandle.asElement().click()
+  await navigationPromise;
+
+  logger.info('-- Going back to the new episode wizard');
+  navigationPromise = page.waitForNavigation();
+  page = await page.goto('https://creators.spotify.com/pod/dashboard/episode/wizard');
+  await navigationPromise;
+}
+
 async function postEpisode(youtubeVideoInfo) {
   let browser;
   let page;
@@ -67,6 +104,9 @@ async function postEpisode(youtubeVideoInfo) {
 
     logger.info('Trying to log in and open episode wizard');
     await loginAndWaitForNewEpisodeWizard();
+
+    logger.info(`Making sure the correct podcast is selected for uploading`);
+    await selectPodcast(page, env.PODCAST_TITLE);
 
     logger.info('Uploading audio file');
     await uploadEpisode();
@@ -134,12 +174,6 @@ async function postEpisode(youtubeVideoInfo) {
 
   async function loginAndWaitForNewEpisodeWizard() {
     await spotifyLogin();
-    try {
-      logger('-- Waiting for navigation after logging in');
-      await page.waitForNavigation();
-    } catch (err) {
-      logger.info('-- The wait for navigation after logging failed or timed-out. Continuing.');
-    }
 
     return Promise.any([acceptSpotifyAuth(), waitForNewEpisodeWizard()]).then((res) => {
       if (res === SPOTIFY_AUTH_ACCEPTED) {
@@ -153,14 +187,18 @@ async function postEpisode(youtubeVideoInfo) {
 
   async function spotifyLogin() {
     logger.info('-- Accessing new Spotify login page for podcasts');
+    var navigationPromise = page.waitForNavigation();
     await clickSelector(page, '::-p-xpath(//span[contains(text(), "Continue with Spotify")]/parent::button)');
-    logger.info('-- Logging in');
+    await navigationPromise;
 
+    logger.info('-- Logging in');
     await page.waitForSelector('#login-username');
     await page.type('#login-username', env.SPOTIFY_EMAIL);
     await page.type('#login-password', env.SPOTIFY_PASSWORD);
-    await sleepSeconds(1);
+
+    navigationPromise = page.waitForNavigation();
     await clickSelector(page, 'button[id="login-button"]');
+    await navigationPromise;
   }
 
   function acceptSpotifyAuth() {
@@ -272,8 +310,10 @@ async function postEpisode(youtubeVideoInfo) {
   }
 
   async function goToDashboard() {
-    await page.goto('https://podcasters.spotify.com/pod/dashboard/episodes');
-    await sleepSeconds(3);
+    logger.info("-- Going to dashboard");
+    var navigationPromise = page.waitForNavigation();
+    page.goto('https://podcasters.spotify.com/pod/dashboard/episodes')
+    await navigationPromise;
   }
 }
 
