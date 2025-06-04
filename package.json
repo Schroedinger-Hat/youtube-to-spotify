@@ -1,6 +1,6 @@
 {
   "name": "youtube-to-spotify",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Github action and general-purpose tool to publish youtube video as spotify episode",
   "main": "src/index.js",
   "scripts": {
