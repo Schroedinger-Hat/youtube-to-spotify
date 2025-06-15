@@ -55,7 +55,11 @@ async function postEpisode(youtubeVideoInfo) {
 
   try {
     logger.info('Launching puppeteer');
-    browser = await puppeteer.launch({ args: ['--no-sandbox'], headless: env.PUPPETEER_HEADLESS });
+    browser = await puppeteer.launch({
+      args: ['--no-sandbox'],
+      headless: env.PUPPETEER_HEADLESS,
+      protocolTimeout: env.UPLOAD_TIMEOUT,
+    });
 
     page = await openNewPage('https://creators.spotify.com/pod/dashboard/episode/wizard');
 
