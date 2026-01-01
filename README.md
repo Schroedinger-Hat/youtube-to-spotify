@@ -169,6 +169,13 @@ env:
   SET_PUBLISH_DATE: true
 ```
 
+### Set browser user data directory
+
+By setting `BROWSER_USER_DATA`, you can create and save the browser user data. 
+When running the script multiple times with the same browser user data, logging would not be required to be performed again.
+This may save some time and reduce potential failures of the script caused by failures to login(for example because of captcha)
+You may first load the script in non-headless mode to generate the browser user data and login by setting the environment variable `LOGIN_ONLY` to `true`. 
+
 ### Set user agent
 
 We allow setting the user agent with the environment variable `USER_AGENT`.
