@@ -171,10 +171,11 @@ async function postEpisode(youtubeVideoInfo) {
     await sleepSeconds(2);
     logger.info('-- Logging in');
 
-    await page.waitForSelector('#login-username');
-    await page.type('#login-username', env.SPOTIFY_EMAIL);
+    const usernameOrEmailInputSelector = 'input[data-testid="login-username"]';
+    await page.waitForSelector(usernameOrEmailInputSelector);
+    await page.type(usernameOrEmailInputSelector, env.SPOTIFY_EMAIL);
 
-    const passwordInputFieldSelector = '#login-password';
+    const passwordInputFieldSelector = 'input[id="password"]';
     const passwordInputField = await page.$(passwordInputFieldSelector);
     const existsPasswordInputField = !!passwordInputField;
 
@@ -208,7 +209,7 @@ async function postEpisode(youtubeVideoInfo) {
    */
   async function clickLoginOrContinueButtonUntilItsNotPresent() {
     await sleepSeconds(1);
-    const loginOrContinueButtonSelector = 'button[id="login-button"]';
+    const loginOrContinueButtonSelector = 'button[data-testid="login-button"]';
     await page.waitForSelector(loginOrContinueButtonSelector, { visible: true });
     await clickSelector(page, loginOrContinueButtonSelector);
 
