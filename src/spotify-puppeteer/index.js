@@ -360,8 +360,12 @@ async function postEpisode(youtubeVideoInfo) {
       const inputEpisodeArt = await page.$(imageUploadInputSelector);
       await inputEpisodeArt.uploadFile(env.THUMBNAIL_FILE);
 
-      logger.info('-- Saving uploaded episode art');
-      await clickSelector(page, '::-p-xpath(//span[text()="Save"]/parent::button)');
+      logger.info(
+        '-- Saving uploaded episode art(clicking with focus and enter instead of regualr because for some reason the regular clicking moves to the final step which it should not.'
+      );
+      // NOTE: clicking by pressing enter with keyboard api because for some reason the regular clicking moves to the final step
+      // await clickSelector(page, '::-p-xpath(//span[text()="Save"]/parent::button)');
+      await clickSelectorUsingKeyboardEnter(page, '::-p-xpath(//span[text()="Save"]/parent::button)');
 
       logger.info('-- Waiting for uploaded episode art to be saved');
       await page.waitForSelector('::-p-xpath(//div[@data-encore-id="dialogConfirmation"])', {
@@ -427,6 +431,13 @@ async function clickSelector(page, selector, options = {}) {
   await page.waitForSelector(selector, options);
   const elementHandle = await page.$(selector);
   await clickDom(page, elementHandle);
+}
+
+async function clickSelectorUsingKeyboardEnter(page, selector, options = {}) {
+  await page.waitForSelector(selector, options);
+  const elementHandle = await page.$(selector);
+  await elementHandle.focus();
+  await page.keyboard.press('Enter');
 }
 
 async function clickDom(page, domElementHandle) {
